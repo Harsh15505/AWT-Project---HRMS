@@ -24,4 +24,17 @@ const loginRules = [
     body('password').notEmpty().withMessage('Password is required'),
 ];
 
-module.exports = { validate, registerRules, loginRules };
+const departmentRules = [
+    body('name').trim().notEmpty().withMessage('Department name is required'),
+    body('code').trim().notEmpty().withMessage('Department code is required'),
+];
+
+const employeeRules = [
+    body('firstName').trim().notEmpty().withMessage('First name is required'),
+    body('lastName').trim().notEmpty().withMessage('Last name is required'),
+    body('email').optional().isEmail().withMessage('Valid email is required').normalizeEmail(),
+    body('department').isMongoId().withMessage('Valid Department ID is required'),
+    body('baseSalary').isNumeric().withMessage('Base salary must be a number'),
+]
+
+module.exports = { validate, registerRules, loginRules, departmentRules, employeeRules };
