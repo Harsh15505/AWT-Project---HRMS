@@ -1,6 +1,7 @@
 # Phase 2 — Authentication & Role-Based Access Control (RBAC)
 
 ## 🎯 What You'll Build in This Phase
+
 - User **registration** and **login** API endpoints
 - **Password hashing** with bcryptjs
 - **JWT token** generation and verification
@@ -14,6 +15,7 @@
 ## 📚 Theory
 
 ### Authentication vs Authorization
+
 These two words sound similar but mean very different things:
 
 | Term | Meaning | Example |
@@ -22,9 +24,11 @@ These two words sound similar but mean very different things:
 | **Authorization** | *What can you do?* — checking permissions | Only Admin can delete users |
 
 ### What is a JWT (JSON Web Token)?
+
 JWT is the industry standard for **stateless authentication**. When a user logs in, the server creates a signed token and sends it to the client. For future requests, the client sends this token back — and the server can verify it without looking up a database session.
 
 A JWT has **3 parts** separated by dots:
+
 ```
 xxxxx.yyyyy.zzzzz
 Header.Payload.Signature
@@ -43,9 +47,11 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9   ← Header (base64)
 > ⚠️ **The payload is NOT encrypted.** Anyone can decode and read it. Never store passwords or sensitive info in a JWT. The signature just proves it hasn't been tampered with.
 
 ### Why Stateless Authentication?
+
 Traditional sessions store session data on the server. JWTs store everything in the token itself. The server just needs to verify the signature — no database lookup needed for every request. This makes it scalable.
 
 ### What is bcrypt?
+
 Bcrypt is a **password hashing function**. You should **never** store plain-text passwords. If your database is hacked, all passwords are exposed.
 
 **Hashing** = one-way transformation. You can hash a password, but you can't reverse a hash back to a password.
@@ -59,6 +65,7 @@ When a user logs in, you hash what they typed and compare it to the stored hash.
 The `10` is the **salt rounds** — how many times the algorithm runs. More rounds = slower but more secure. `10` is the standard.
 
 ### What is RBAC (Role-Based Access Control)?
+
 Users are assigned **roles**, and roles determine **what they can access**.
 
 ```
@@ -101,6 +108,7 @@ frontend/src/
 ### Step 1 — Create the User Model
 
 📁 `backend/models/User.js`
+
 ```javascript
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -161,6 +169,7 @@ module.exports = mongoose.model('User', userSchema);
 ```
 
 > 📝 **Code Breakdown:**
+>
 > - `new mongoose.Schema({ ... }, { timestamps: true })` — defines the shape of User documents. `timestamps: true` auto-adds `createdAt` and `updatedAt` fields to every document
 > - `required: [true, 'Name is required']` — array syntax lets you provide a custom error message when validation fails
 > - `unique: true` — MongoDB creates an index ensuring no two users can have the same email
@@ -207,6 +216,7 @@ Finally, `bcrypt.hash()` combines your typed password (`"admin123"`) with the un
 Only then do we call `next()`, signaling to Mongoose: *"I'm done modifying the document, you may proceed with saving it to MongoDB!"*
 
 **Key concepts here:**
+
 - `select: false` on password — Mongoose won't include the password field in query results unless you explicitly ask for it (`.select('+password')`)
 - `pre('save')` hook — runs automatically before every `.save()` call
 - `isModified('password')` — prevents re-hashing the password when updating other fields
@@ -217,6 +227,7 @@ Only then do we call `next()`, signaling to Mongoose: *"I'm done modifying the d
 ### Step 2 — Create a JWT Utility
 
 📁 `backend/utils/generateToken.js`
+
 ```javascript
 const jwt = require('jsonwebtoken');
 
@@ -232,6 +243,7 @@ module.exports = generateToken;
 ```
 
 > 📝 **Code Breakdown:**
+>
 > - `jwt.sign(payload, secret, options)` — creates the JWT. It encodes `payload` into the token and signs it with the `secret` so you can verify it wasn't tampered with later
 > - `{ userId, role }` — the **payload** stored inside the token. This data can be read by anyone who decodes the token, so only store non-sensitive info here
 > - `process.env.JWT_SECRET` — the signing secret from `.env`. Must match the key used in `jwt.verify()` later
@@ -242,6 +254,7 @@ module.exports = generateToken;
 Using `express-validator` keeps our controllers skinny by offloading error checks to middleware.
 
 📁 `backend/middleware/validators.js`
+
 ```javascript
 const { body, validationResult } = require('express-validator');
 
@@ -277,6 +290,7 @@ module.exports = { validate, registerRules, loginRules };
 ### Step 4 — Auth Controller (Register & Login)
 
 📁 `backend/controllers/authController.js`
+
 ```javascript
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
@@ -361,20 +375,23 @@ const loginUser = asyncHandler(async (req, res) => {
 // ─── GET CURRENT USER ─────────────────────────────────────────
 // @route  GET /api/auth/me
 // @access Private (requires token)
-const getMe = async (req, res) => {
-  try {
-    // req.user is set by the protect middleware
-    const user = await User.findById(req.user.userId);
-    res.json({ success: true, user });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+const getMe = asyncHandler(async (req, res) => {
+  // req.user is set by the protect middleware
+  const user = await User.findById(req.user.userId);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
   }
-};
+  res.json({ success: true, user });
+});
 
 module.exports = { registerUser, loginUser, getMe };
 ```
 
 > 📝 **Code Breakdown:**
+>
+> - `asyncHandler` — a wrapper that automatically catches any errors thrown in an async route and passes them to our global `errorMiddleware`. It completely eliminates the need to write `try-catch` blocks for every single controller function!
+> - `res.status(400); throw new Error(...)` — instead of manually sending JSON error responses, we set the status code and throw an error. The `asyncHandler` catches it, and our global error handler properly formats the `{success: false}` response.
 > - `const { name, email, password, role } = req.body` — **destructuring**: extracts named fields from `req.body` in one line instead of writing `req.body.name`, `req.body.email`, etc.
 > - `await User.findOne({ email })` — searches the `users` collection for a document where `email` matches. Returns `null` if not found
 > - `return res.status(400).json(...)` — `return` is important here! Without it, Express would continue running the rest of the function even after sending this response, causing a "headers already sent" error
@@ -391,6 +408,7 @@ module.exports = { registerUser, loginUser, getMe };
 ### Step 5 — Auth Routes
 
 📁 `backend/routes/authRoutes.js`
+
 ```javascript
 const express = require('express');
 const router = express.Router();
@@ -410,6 +428,7 @@ module.exports = router;
 ### Step 6 — Auth Middleware (protect & authorizeRoles)
 
 📁 `backend/middleware/authMiddleware.js`
+
 ```javascript
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -465,8 +484,9 @@ module.exports = { protect, authorizeRoles };
 ```
 
 > 📝 **Code Breakdown:**
+>
 > - `protect` — verifies identity: "Are you logged in?"
-> - `req.headers.authorization?.startsWith('Bearer')` — tokens are standardized to be sent in the `Authorization` HTTP header with a `Bearer ` prefix
+> - `req.headers.authorization?.startsWith('Bearer')` — tokens are standardized to be sent in the `Authorization` HTTP header with a `Bearer` prefix
 > - `jwt.verify(token, ...)` — uses your secret to mathematically verify the token wasn't forged. If valid, it returns the decoded payload (e.g. `{ userId: '...', role: 'Admin' }`)
 > - `req.user = decoded` — attaches the parsed user data to the Express request object so the next function in the chain can use it
 > - `TokenExpiredError` — `jwt.verify` throws a specific error if the token has passed its expiration date
@@ -475,6 +495,7 @@ module.exports = { protect, authorizeRoles };
 
 **How `authorizeRoles` works:**
 It's a function that returns a middleware function. This pattern is called a **middleware factory** or **higher-order function**. You call it like:
+
 ```javascript
 router.delete('/user/:id', protect, authorizeRoles('Admin'), deleteUser);
 // Only Admins can delete users
@@ -485,6 +506,7 @@ router.delete('/user/:id', protect, authorizeRoles('Admin'), deleteUser);
 ### Step 7 — Register Routes in app.js
 
 📁 `backend/app.js` (add these lines)
+
 ```javascript
 const authRoutes = require('./routes/authRoutes');
 
@@ -497,6 +519,7 @@ app.use('/api/auth', authRoutes);
 ### Step 8 — Create the Seed Script (First Admin User)
 
 📁 `backend/scripts/seedAdmin.js`
+
 ```javascript
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -535,6 +558,7 @@ seedAdmin();
 ```
 
 Run it once:
+
 ```bash
 node scripts/seedAdmin.js
 ```
@@ -544,6 +568,7 @@ node scripts/seedAdmin.js
 ### Step 9 — React Auth Context
 
 📁 `frontend/src/context/AuthContext.jsx`
+
 ```jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import API from '../services/api';
@@ -602,6 +627,7 @@ export default AuthContext;
 ```
 
 > 📝 **Code Breakdown:**
+>
 > - `createContext` — creates a global state context that any React component can access without needing to pass props down multiple levels
 > - `localStorage.getItem('hrms_token')` — checks if the user previously logged in, surviving browser refreshes
 > - `useEffect(() => { loadUser() }, [token])` — runs when the app starts or when the token changes. It asks the backend `/auth/me` to verify the token and return the user profile
@@ -613,6 +639,7 @@ export default AuthContext;
 Wrap your app with the provider in `main.jsx`:
 
 📁 `frontend/src/main.jsx`
+
 ```jsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -634,6 +661,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 ### Step 9 — Protected Route Component
 
 📁 `frontend/src/components/ProtectedRoute.jsx`
+
 ```jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
@@ -664,6 +692,7 @@ export default ProtectedRoute;
 ```
 
 > 📝 **Code Breakdown:**
+>
 > - `<ProtectedRoute>` — a wrapper component we'll put around pages that require login (like dashboards). If a user isn't allowed to see the page, this component prevents it from rendering
 > - `const { user, loading } = useAuth()` — grabs the current login state from the context we just built
 > - `if (loading)` — prevents a flicker. While `/auth/me` is checking the token on initial load, show "Loading..." instead of instantly kicking them to the login screen
@@ -676,6 +705,7 @@ export default ProtectedRoute;
 ### Step 10 — Login Page
 
 📁 `frontend/src/pages/Login.jsx`
+
 ```jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -800,6 +830,7 @@ export default Login;
 ```
 
 > 📝 **Code Breakdown:**
+>
 > - `const [formData, setFormData] = useState(...)` — state to hold what the user types in the email and password boxes
 > - `handleChange` — dynamically updates `formData` based on which input triggered it (`e.target.name`)
 > - `e.preventDefault()` — stops the browser from doing a full page refresh when the form is submitted
@@ -814,6 +845,7 @@ export default Login;
 ### Step 11 — Update App.jsx with Routes
 
 📁 `frontend/src/App.jsx`
+
 ```jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -872,6 +904,7 @@ export default App;
 ## ⚠️ Edge Cases & Gotchas
 
 ### 1. Always use `.select('+password')` when logging in
+
 ```javascript
 // ❌ Wrong — password won't be present, comparePassword will fail
 const user = await User.findOne({ email });
@@ -881,12 +914,15 @@ const user = await User.findOne({ email }).select('+password');
 ```
 
 ### 2. Don't re-hash the password on update
+
 The `pre('save')` hook runs on every `.save()`. If you change only the email and call `.save()`, without the `isModified('password')` guard, the password would be hashed again → login breaks.
 
 ### 3. Vague error messages on login failure
+
 Don't say "Email not found" or "Wrong password" separately — attackers can use this to enumerate valid emails. Always say "Invalid credentials" for both cases.
 
 ### 4. JWT secret must be strong in production
+
 ```env
 # ❌ Weak
 JWT_SECRET=secret
@@ -896,7 +932,9 @@ JWT_SECRET=a9f2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
 ```
 
 ### 5. Handle token expiry on the frontend
+
 In `api.js`, add a response interceptor:
+
 ```javascript
 API.interceptors.response.use(
   (response) => response,
@@ -911,14 +949,17 @@ API.interceptors.response.use(
 ```
 
 ### 6. `loading` state prevents flash of unauthenticated content
+
 Without the `loading` check in `ProtectedRoute`, a logged-in user visiting `/admin/dashboard` would briefly see a redirect to `/login` before the user data loads. The `loading` state prevents this flash.
 
 ### 7. HTTP-only cookies vs localStorage
+
 Storing JWTs in `localStorage` is simple but vulnerable to **XSS (Cross-Site Scripting)** attacks. For higher security, use `httpOnly` cookies — JavaScript can't read them, only the browser sends them automatically. For a learning project, `localStorage` is acceptable.
 
 ---
 
 ## ✅ Phase 2 Checklist
+
 - [ ] `models/User.js` — schema with password hashing hook
 - [ ] `utils/generateToken.js` — JWT generator
 - [ ] `controllers/authController.js` — register, login, getMe
@@ -935,4 +976,5 @@ Storing JWTs in `localStorage` is simple but vulnerable to **XSS (Cross-Site Scr
 ---
 
 ## 🔗 What's Next?
+
 **Phase 3** — Employee profile management: creating, viewing, editing employees, and linking them to departments.

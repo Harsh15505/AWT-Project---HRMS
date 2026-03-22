@@ -1,27 +1,47 @@
-const { body, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const validate = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!erros.isEmpty()) {
-        return res.status(400).json({
+// Verifies JWT token — use this on any protected route
+const protect = async (req, res, next) => {
+    let token;
+
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+        return res.status(401).json({
             success: false,
-            message: 'Validation failed',
-            errors: errors.array().map(e => ({ filed: e.path, message: e.msg })),
+            message: 'Not authorized - no token provided',
         });
     }
-    next();
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        req.user = decoded;
+        next();
+
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ success: false, message: 'Token has expired. Please log in again.' });
+        }
+        return res.status(401).json({ success: false, message: 'Not authorized - invalid token' });
+
+    }
 };
 
-const registerRules = [
-    body('name').trim().notEmpty().withMessage('Name is required'),
-    body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    body('role').optional().isIn(['Admin', 'HR Officer', 'Payroll Officer', 'Employee'])
-];
+const authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({
+                success: false,
+                message: `Role '${req.user.role}' is not authorized to access this route`,
+            });
+        }
+        next();
+    };
+};
 
-const loginRules = [
-    body('email').isEmail().withMessage('Valid email is required'),
-    body('password').notEmpty().withMessage('Password is required'),
-];
+module.exports = { protect, authorizeRoles };
 
-module.exports = { validate, registerRules, loginRules };
