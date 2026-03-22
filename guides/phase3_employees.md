@@ -759,6 +759,43 @@ Employee.find({ $text: { $search: searchTerm } });
 
 ---
 
+## 🔍 What to Test
+
+### 1. Employee List
+- **Rendering**: Open `/hr/employees`. Ensure the table loads and displays employee data (ID, Name, Dept, etc.).
+- **Search**: Type a name or ID in the search bar. The list should update dynamically (with a 300ms debounce).
+- **Navigation**: Click the "+ Add Employee" button and verify it takes you to `/hr/employees/new`.
+
+### 2. Add Employee Form
+- **Dropdowns**: Ensure the "Department" dropdown is populated with departments from your database.
+- **Validation**: Try to submit the form without the required fields (First Name, Last Name, Dept, Base Salary). The browser or form should block submission.
+- **Submission**: Fill out the form and submit. You should be redirected back to the Employee List, and the new employee should appear at the top.
+- **Auto-generated ID**: (Optional) If you implemented the static `generateEmployeeId` method, verify that the `employeeId` field is correctly assigned if left blank.
+
+### 3. API Integration
+- **Payload**: Check the Network tab in DevTools to ensure the `POST /api/employees` request contains the correct data.
+- **Error Handling**: Try creating an employee with a duplicate ID or email. Verify that a relevant error message is displayed in the UI.
+
+---
+
+---
+
+## 🧪 Seeding Data for Testing
+
+Before testing the UI, you need an **HR account** to log in and some **Departments** to populate the dropdowns. 
+
+1. Create a `seed.js` script in your `backend/` folder.
+2. Run the script from your terminal:
+   ```bash
+   cd backend
+   node seed.js
+   ```
+3. Use the following credentials to log in:
+   - **Email**: `hr@hrms.com` / `admin@hrms.com`
+   - **Password**: `password123`
+
+---
+
 ## ✅ Phase 3 Checklist
 - [ ] `models/Department.js` created
 - [ ] `models/Employee.js` created with virtual + static method

@@ -3,8 +3,8 @@ const cors = require('cors');
 const morgan = require('morgan');
 const { errorHandler } = require('./src/middleware/errorMiddleware');
 const authRoutes = require('./src/routes/authRoutes')
-const employeeRoutes = require('./routes/employeeRoutes');
-const departmentRoutes = require('./routes/departmentRoutes');
+const employeeRoutes = require('./src/routes/employeeRoutes');
+const departmentRoutes = require('./src/routes/departmentRoutes');
 
 const app = express();
 

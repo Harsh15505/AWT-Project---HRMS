@@ -1,7 +1,7 @@
 const Department = require('../models/Department');
 const { asyncHandler } = require('../middleware/errorMiddleware');
 
-const getAllDepartments = asyncHandler(async () => {
+const getAllDepartments = asyncHandler(async (req, res) => {
     const departments = await Department.find({ isActive: true }).sort({ name: 1 });
     res.json({
         success: true,

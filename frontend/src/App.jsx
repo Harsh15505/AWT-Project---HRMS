@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
+import EmployeeList from './pages/EmployeeList';
+import AddEmployee from './pages/AddEmployee';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const AdminDashboard = () => <h1>Admin Dashboard</h1>;
@@ -13,6 +15,19 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+
+        {/* Employee Management Routes */}
+        <Route path="/hr/employees" element={
+          <ProtectedRoute roles={['Admin', 'HR Officer']}>
+            <EmployeeList />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/hr/employees/new" element={
+          <ProtectedRoute roles={['Admin', 'HR Officer']}>
+            <AddEmployee />
+          </ProtectedRoute>
+        } />
 
         <Route path="/admin/dashboard" element={
           <ProtectedRoute roles={['Admin']}>
