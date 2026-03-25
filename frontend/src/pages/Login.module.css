@@ -3,98 +3,82 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f5f5f5;
     padding: 1rem;
 }
 
 .card {
-    background: #ffffff;
-    padding: 2.5rem;
-    border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: white;
+    padding: 2rem;
+    border: 1px solid #ddd;
     width: 100%;
-    max-width: 420px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 400px;
 }
 
 .title {
     text-align: center;
-    font-size: 2.5rem;
+    font-size: 2rem;
     margin-bottom: 0.5rem;
-    font-weight: 800;
-    color: #2d3748;
-    letter-spacing: -0.025em;
+    font-weight: bold;
+    color: #333;
 }
 
 .subtitle {
     text-align: center;
-    color: #718096;
-    margin-bottom: 2rem;
-    font-weight: 500;
-    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
 }
 
 .error {
-    background: #fff5f5;
-    border: 1px solid #feb2b2;
-    color: #c53030;
-    padding: 1rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    background: #ffebee;
+    border: 1px solid #f44336;
+    color: #c62828;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
 }
 
 .form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .field label {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #4a5568;
-    margin-left: 0.25rem;
+    color: #333;
 }
 
 .input {
-    padding: 0.875rem 1.25rem;
-    border-radius: 12px;
-    border: 2px solid #edf2f7;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
     font-size: 1rem;
     outline: none;
-    transition: all 0.2s ease;
-    background: #f8fafc;
+    background: white;
 }
 
 .input:focus {
-    border-color: #667eea;
-    background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #666;
+    background: white;
 }
 
 .button {
-    padding: 1rem;
-    background: linear-gradient(to right, #667eea, #764ba2);
-    color: #ffffff;
+    padding: 0.75rem;
+    background: #333;
+    color: white;
     border: none;
-    border-radius: 12px;
     font-size: 1rem;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: bold;
     margin-top: 1rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .button:hover:not(:disabled) {

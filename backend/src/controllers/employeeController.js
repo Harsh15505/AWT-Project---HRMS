@@ -27,7 +27,6 @@ const getAllEmployees = asyncHandler(async (req, res) => {
 
 // @route GET /api/employees/:id
 const getEmployee = asyncHandler(async (req, res) => {
-    // Employees can only view their own profile
     if (req.user.role === 'Employee') {
         const emp = await Employee.findOne({ user: req.user.userId });
         if (!emp || emp._id.toString() !== req.params.id) {
@@ -54,7 +53,6 @@ const createEmployee = asyncHandler(async (req, res) => {
         firstName, lastName, gender, dateOfBirth, phone, address,
         department, designation, employmentType, baseSalary,
         dateOfJoining, emergencyContact,
-        // User account details (optional)
         createUserAccount, email, password, role,
     } = req.body;
 
@@ -62,7 +60,6 @@ const createEmployee = asyncHandler(async (req, res) => {
 
     let userId = null;
 
-    // Optionally create a User account at the same time
     if (createUserAccount && email && password) {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -93,7 +90,6 @@ const createEmployee = asyncHandler(async (req, res) => {
 
 // @route PUT /api/employees/:id
 const updateEmployee = asyncHandler(async (req, res) => {
-    // Prevent changing employeeId and user reference via this endpoint
     const { employeeId, user, ...updates } = req.body;
 
     const employee = await Employee.findByIdAndUpdate(
@@ -122,7 +118,6 @@ const deactivateEmployee = asyncHandler(async (req, res) => {
         throw new Error('Employee not found');
     }
 
-    // Also deactivate their user account
     if (employee.user) {
         await User.findByIdAndUpdate(employee.user, { isActive: false });
     }

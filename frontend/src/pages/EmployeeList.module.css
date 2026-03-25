@@ -2,8 +2,7 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #2d3748;
+  color: #333;
 }
 
 .header {
@@ -14,89 +13,74 @@
 }
 
 .title {
-  font-size: 1.875rem;
-  font-weight: 800;
-  color: #1a202c;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
   margin: 0;
-  letter-spacing: -0.025em;
 }
 
 .addButton {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
+  padding: 0.6rem 1.2rem;
+  background: #333;
+  color: white;
   border: none;
-  border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.95rem;
-  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .addButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 7px 14px rgba(102, 126, 234, 0.3);
-  filter: brightness(1.1);
+  background: #555;
 }
 
 .addButton:active {
-  transform: translateY(0);
+  background: #222;
 }
 
 .searchInput {
   width: 100%;
-  padding: 0.875rem 1.25rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background-color: #f7fafc;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  background-color: white;
   margin-bottom: 1.5rem;
   font-size: 1rem;
-  transition: all 0.2s ease;
   outline: none;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .searchInput:focus {
-  background-color: #fff;
-  border-color: #667eea;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  background-color: white;
+  border-color: #666;
 }
 
 .tableWrapper {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  background: white;
   overflow: hidden;
-  border: 1px solid #edf2f7;
+  border: 1px solid #ddd;
 }
 
 .table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
 }
 
 .tableHeader {
-  background: #f8fafc;
+  background: #f9f9f9;
 }
 
 .tableHeader th {
-  padding: 1.25rem 1rem;
+  padding: 1rem;
   text-align: left;
-  font-weight: 700;
-  color: #4a5568;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid #edf2f7;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #ddd;
 }
 
 .tableRow {
-  transition: all 0.2s ease;
+  transition: none;
 }
 
 .tableRow:hover {

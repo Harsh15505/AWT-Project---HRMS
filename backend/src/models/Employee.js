@@ -8,12 +8,17 @@ const employeeSchema = new mongoose.Schema({
         trim: true,
     },
 
-    firstName: { type: String, requried: true, trim: true },
+    firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     gender: { type: String, enum: ['Male', 'Female', 'Other'] },
     dateOfBirth: { type: Date },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
+
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
 
     department: {
         type: mongoose.Schema.Types.ObjectId,
