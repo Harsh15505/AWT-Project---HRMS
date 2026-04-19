@@ -9,3 +9,8 @@ body {
   background-color: #f5f7fa;
   color: #333;
 }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}
